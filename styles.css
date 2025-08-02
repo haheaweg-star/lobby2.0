@@ -1,0 +1,1285 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    background-color: #87CEEB;
+}
+
+.game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.game-world {
+    position: absolute;
+    width: 2000vw; /* Expanded for more walking space */
+    height: 100vh;
+    background: linear-gradient(to bottom, #e6d7c3 0%, #d2b48c 100%);
+}
+
+/* Floor and ceiling */
+.floor {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60%; /* Twice the size */
+    background: linear-gradient(to top, #8B4513 0%, #a0826d 100%);
+    border-top: 3px solid #5d2906;
+    overflow: hidden;
+}
+
+.floor::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(
+        90deg,
+        rgba(0,0,0,0.1) 0px,
+        rgba(0,0,0,0.1) 1px,
+        transparent 1px,
+        transparent 40px
+    );
+}
+
+.ceiling {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 20%;
+    background: linear-gradient(to bottom, #f5f5f5 0%, #e6d7c3 100%);
+    border-bottom: 2px solid #d2b48c;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Walls */
+.wall {
+    position: absolute;
+    top: 20%;
+    bottom: 60%; /* Adjusted for taller floor */
+    width: 100%;
+    background: linear-gradient(to right, #c19a6b 0%, #d2b48c 50%, #c19a6b 100%);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+}
+
+/* Second floor (visible from below) */
+.second-floor {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to bottom, #f5f5f5 0%, #e6d7c3 100%);
+    border-bottom: 5px solid #8B4513;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 5;
+}
+
+.second-floor-wall {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 80%;
+    background: linear-gradient(to right, #c19a6b 0%, #d2b48c 50%, #c19a6b 100%);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+}
+
+/* Second floor lounge styling */
+.lounge-floor {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 30%;
+    background: linear-gradient(to top, #8B4513 0%, #a0826d 100%);
+    border-top: 3px solid #5d2906;
+    overflow: hidden;
+}
+
+.lounge-floor::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        repeating-linear-gradient(
+            90deg,
+            rgba(139, 69, 19, 0.1) 0px,
+            rgba(139, 69, 19, 0.1) 1px,
+            transparent 1px,
+            transparent 40px
+        ),
+        repeating-linear-gradient(
+            0deg,
+            rgba(139, 69, 19, 0.1) 0px,
+            rgba(139, 69, 19, 0.1) 1px,
+            transparent 1px,
+            transparent 40px
+        );
+}
+
+/* Elevator shaft (rightmost part of lobby) */
+.elevator-shaft {
+    position: absolute;
+    right: 0; /* Far right of lobby */
+    bottom: 60%; /* Adjusted for taller floor */
+    width: 100px;
+    height: 40%;
+    background: linear-gradient(to right, #555, #333);
+    border: 3px solid #222;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    z-index: 6;
+}
+
+.elevator {
+    position: absolute;
+    bottom: 0;
+    left: 5px;
+    width: 90px;
+    height: 120px;
+    background: linear-gradient(to right, #ccc, #aaa);
+    border: 2px solid #888;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #333;
+    transition: bottom 2s ease-in-out;
+}
+
+.elevator-locked {
+    background: linear-gradient(to right, #999, #777);
+    color: #555;
+}
+
+.elevator-call-button {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 80px;
+    height: 30px;
+    background: #ff6b6b;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.elevator-call-button:hover {
+    background: #d9534f;
+}
+
+.elevator-call-button:disabled {
+    background: #999;
+    cursor: not-allowed;
+}
+
+/* Bookshelf with books */
+.bookshelf {
+    position: absolute;
+    bottom: 60%; /* Adjusted for taller floor */
+    width: 120px;
+    height: 250px; /* Taller for 5 shelves */
+    background: linear-gradient(to right, #8B4513 0%, #a0826d 50%, #8B4513 100%);
+    border-radius: 5px;
+    box-shadow: 
+        0 10px 20px rgba(0,0,0,0.3),
+        inset 0 -5px 10px rgba(0,0,0,0.2);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 5px;
+}
+
+.bookshelf::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    right: 5px;
+    height: 5px;
+    background-color: #5d2906;
+    box-shadow: 0 5px 0 #5d2906, 0 15px 0 #5d2906, 0 25px 0 #5d2906, 0 35px 0 #5d2906;
+}
+
+.bookshelf::after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    left: 5px;
+    right: 5px;
+    height: 5px;
+    background-color: #5d2906;
+}
+
+.book {
+    width: 15px;
+    height: 40px; /* Smaller to fit 7 books */
+    margin: 0 1px; /* Smaller margin */
+    border-radius: 2px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    font-size: 6px;
+    color: white;
+    text-shadow: 0 0 1px black;
+    padding-bottom: 2px;
+    overflow: hidden;
+}
+
+.book:hover {
+    transform: translateY(-5px);
+}
+
+.book-1 { background: linear-gradient(to right, #ff6b6b, #d9534f); }
+.book-2 { background: linear-gradient(to right, #4d79ff, #3399ff); }
+.book-3 { background: linear-gradient(to right, #5cb85c, #4cae4c); }
+.book-4 { background: linear-gradient(to right, #f0ad4e, #ec971f); }
+.book-5 { background: linear-gradient(to right, #9b59b6, #8e44ad); }
+.book-6 { background: linear-gradient(to right, #1abc9c, #16a085); }
+.book-7 { background: linear-gradient(to right, #e67e22, #d35400); }
+
+/* Reception desk */
+.reception-desk {
+    position: absolute;
+    bottom: 60%; /* Adjusted for taller floor */
+    left: 4500px;
+    width: 300px;
+    height: 80px;
+    background: linear-gradient(to right, #8B4513, #a0826d);
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 2;
+}
+
+.desk-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(to right, #a0826d, #8B4513);
+    border-radius: 5px 5px 0 0;
+}
+
+/* Computer for receptionists */
+.computer {
+    position: absolute;
+    top: -30px;
+    width: 60px;
+    height: 40px;
+    background: #333;
+    border-radius: 5px;
+    z-index: 3;
+}
+
+.computer::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    background: #4d79ff;
+    border-radius: 3px;
+}
+
+/* Water cooler */
+.water-cooler {
+    position: absolute;
+    bottom: 60%; /* Adjusted for taller floor */
+    left: 4850px;
+    width: 60px;
+    height: 100px;
+    background: linear-gradient(to right, #4d79ff, #3399ff);
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 2;
+}
+
+.water-cooler::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50%;
+}
+
+.water-cooler::after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    left: 15px;
+    width: 30px;
+    height: 10px;
+    background: #333;
+    border-radius: 5px;
+}
+
+/* Bulletin board with leaderboard */
+.bulletin-board {
+    position: absolute;
+    bottom: 80%; /* Adjusted for taller floor */
+    left: 2000px;
+    width: 200px;
+    height: 250px;
+    background: linear-gradient(to right, #8B4513, #a0826d);
+    border: 5px solid #5d2906;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 2;
+    cursor: pointer;
+}
+
+.bulletin-board::before {
+    content: 'HIGH SCORES';
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    font-size: 1.2rem;
+}
+
+/* TV screens showing YouTube videos */
+.tv-screen {
+    position: absolute;
+    bottom: 70%; /* Adjusted for taller floor */
+    width: 200px;
+    height: 150px;
+    background: #333;
+    border: 10px solid #222;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 2;
+    overflow: hidden;
+}
+
+.tv-screen iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Character with detailed parts */
+.character {
+    position: absolute;
+    bottom: 60%; /* Adjusted for taller floor */
+    width: 60px;
+    height: 120px;
+    z-index: 10;
+    transition: transform 0.1s;
+}
+
+.character.crouching {
+    height: 80px;
+}
+
+.character.jumping {
+    animation: jump 0.8s ease-out;
+}
+
+.character.double-jumping {
+    animation: doubleJump 1.2s ease-out;
+}
+
+@keyframes jump {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-100px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes doubleJump {
+    0% { transform: translateY(0); }
+    25% { transform: translateY(-100px); }
+    50% { transform: translateY(0); }
+    75% { transform: translateY(-200px) rotateZ(360deg); }
+    100% { transform: translateY(0); }
+}
+
+.character.walking .arm.left {
+    animation: walkArmLeft 0.5s infinite alternate;
+}
+
+.character.walking .arm.right {
+    animation: walkArmRight 0.5s infinite alternate;
+}
+
+.character.walking .leg.left {
+    animation: walkLegLeft 0.5s infinite alternate;
+}
+
+.character.walking .leg.right {
+    animation: walkLegRight 0.5s infinite alternate;
+}
+
+@keyframes walkArmLeft {
+    0% { transform: rotate(-20deg); }
+    100% { transform: rotate(20deg); }
+}
+
+@keyframes walkArmRight {
+    0% { transform: rotate(20deg); }
+    100% { transform: rotate(-20deg); }
+}
+
+@keyframes walkLegLeft {
+    0% { transform: rotate(-10deg); }
+    100% { transform: rotate(10deg); }
+}
+
+@keyframes walkLegRight {
+    0% { transform: rotate(10deg); }
+    100% { transform: rotate(-10deg); }
+}
+
+.character-part {
+    position: absolute;
+}
+
+.head {
+    width: 40px;
+    height: 40px;
+    top: 0;
+    left: 10px;
+    background: radial-gradient(circle at 30% 30%, #ffddaa, #ffcc99);
+    box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+    z-index: 5;
+    border-radius: 50%;
+}
+
+.hair {
+    width: 45px;
+    height: 30px;
+    top: -15px;
+    left: 7.5px;
+    background: radial-gradient(circle at 30% 30%, #a0826d, #8B4513);
+    border-radius: 50% 50% 0 0;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    z-index: 4;
+    /* Curly hair effect */
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(160, 130, 109, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 40% 40%, rgba(160, 130, 109, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 60% 40%, rgba(139, 69, 19, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 30% 60%, rgba(160, 130, 109, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 70% 60%, rgba(139, 69, 19, 0.8) 0%, transparent 30%);
+}
+
+.ear {
+    position: absolute;
+    width: 10px;
+    height: 15px;
+    background: radial-gradient(circle at 30% 30%, #ffddaa, #ffcc99);
+    border-radius: 50%;
+    z-index: 4;
+}
+
+.ear.left {
+    top: 12px;
+    left: -5px; /* Position on the side of the head */
+}
+
+.ear.right {
+    top: 12px;
+    right: -5px; /* Position on the side of the head */
+}
+
+.eye {
+    width: 15px; /* Larger eyes */
+    height: 15px; /* Larger eyes */
+    background-color: white; /* Eye whites */
+    top: 12px; /* Position higher */
+    border-radius: 50%;
+    box-shadow: inset 0 0 3px rgba(255,255,255,0.5);
+    overflow: hidden;
+}
+
+.eye.left {
+    left: 8px;
+}
+
+.eye.right {
+    right: 8px;
+}
+
+.eyelid {
+    position: absolute;
+    width: 100%;
+    height: 50%; /* Cover half the eye */
+    top: 0;
+    left: 0;
+    background-color: #ffddaa;
+    z-index: 1;
+}
+
+.pupil {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: #333;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.mouth {
+    width: 10px; /* Skinnier mouth */
+    height: 3px; /* Skinnier mouth */
+    background-color: #333;
+    bottom: 8px; /* Position underneath eyes */
+    left: 25px; /* Centered */
+    border-radius: 0 0 50% 50%;
+    box-shadow: inset 0 -2px 3px rgba(0,0,0,0.2);
+}
+
+.body {
+    width: 40px;
+    height: 50px;
+    top: 35px;
+    left: 10px;
+    background: repeating-linear-gradient(
+        0deg,
+        #ff4d4d,
+        #ff4d4d 5px,
+        #4d79ff 5px,
+        #4d79ff 10px
+    );
+    border-radius: 10px 10px 0 0;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    z-index: 3;
+}
+
+.arm {
+    width: 8px; /* Skinnier arms */
+    height: 40px;
+    top: 40px;
+    background: radial-gradient(circle at 30% 30%, #ffddaa, #ffcc99);
+    border-radius: 10px;
+    transform-origin: top center;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    z-index: 2;
+}
+
+.arm.left {
+    left: 2px; /* On the side of body, not behind */
+    transform: rotate(-10deg); /* Resting beside body */
+}
+
+.arm.right {
+    right: 2px; /* On the side of body, not behind */
+    transform: rotate(10deg); /* Resting beside body */
+}
+
+.hand {
+    position: absolute;
+    width: 12px; /* Circular hands */
+    height: 12px; /* Circular hands */
+    background: radial-gradient(circle at 30% 30%, #ffddaa, #ffcc99);
+    border-radius: 50%;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+.leg {
+    width: 8px; /* Skinnier legs */
+    height: 40px;
+    top: 80px;
+    background: radial-gradient(circle at 30% 30%, #6b9dff, #4d79ff);
+    border-radius: 5px;
+    transform-origin: top center;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+.leg.left {
+    left: 20px;
+}
+
+.leg.right {
+    right: 20px;
+}
+
+.foot {
+    width: 15px;
+    height: 8px;
+    bottom: -8px; /* At the bottom of legs */
+    background: radial-gradient(circle at 30% 30%, #e6b366, #cc9966);
+    border-radius: 50%;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    z-index: 0;
+    transition: transform 0.2s;
+}
+
+.foot.left {
+    left: 16px;
+}
+
+.foot.right {
+    right: 16px;
+}
+
+.character.facing-right .foot.left,
+.character.facing-right .foot.right {
+    transform: scaleX(1);
+}
+
+.character.facing-left .foot.left,
+.character.facing-left .foot.right {
+    transform: scaleX(-1);
+}
+
+/* NPC variations */
+.npc {
+    position: absolute;
+    bottom: 60%; /* Adjusted for taller floor */
+    width: 60px;
+    height: 120px;
+    z-index: 5;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.npc:hover {
+    transform: scale(1.1);
+}
+
+.npc-role {
+    position: absolute;
+    top: -30px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #8B4513;
+    background-color: rgba(255,255,255,0.9);
+    padding: 2px;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.npc:hover .npc-role {
+    opacity: 1;
+}
+
+.npc-female .hair {
+    width: 45px;
+    height: 35px;
+    background: radial-gradient(circle at 30% 30%, #555, #333);
+    border-radius: 50% 50% 0 0;
+    /* Curly hair for females */
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(85, 85, 85, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(51, 51, 51, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 40% 40%, rgba(85, 85, 85, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 60% 40%, rgba(51, 51, 51, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 30% 60%, rgba(85, 85, 85, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 70% 60%, rgba(51, 51, 51, 0.8) 0%, transparent 30%);
+}
+
+.npc-female .body {
+    background: radial-gradient(circle at 30% 30%, #ffb3d9, #ff99cc);
+}
+
+.npc-male .hair {
+    width: 45px;
+    height: 20px;
+    background: radial-gradient(circle at 30% 30%, #a0826d, #8B4513);
+    border-radius: 50% 50% 0 0;
+    /* Curly hair for males */
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(160, 130, 109, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 40% 40%, rgba(160, 130, 109, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 60% 40%, rgba(139, 69, 19, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 30% 60%, rgba(160, 130, 109, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 70% 60%, rgba(139, 69, 19, 0.8) 0%, transparent 30%);
+}
+
+.npc-male .body {
+    background: radial-gradient(circle at 30% 30%, #66b3ff, #3399ff);
+}
+
+.npc-formal .body {
+    background: radial-gradient(circle at 30% 30%, #555, #333);
+}
+
+.npc-formal .leg {
+    background: radial-gradient(circle at 30% 30%, #555, #333);
+}
+
+.npc-casual .body {
+    background: radial-gradient(circle at 30% 30%, #7dd87d, #5cb85c);
+}
+
+/* Shadow effects for depth */
+.shadow {
+    position: absolute;
+    bottom: 58%; /* Adjusted for taller floor */
+    width: 50px;
+    height: 15px;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+/* Dialogue system */
+.dialogue {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    border: 2px solid #8B4513;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 500px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 100;
+}
+
+.dialogue-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.dialogue-title {
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.dialogue-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #8B4513;
+}
+
+.dialogue-content {
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.dialogue-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dialogue-select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #8B4513;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.dialogue-response {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    display: none;
+}
+
+.dialogue-option {
+    background-color: #8B4513;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: flex-end;
+}
+
+/* Book modal */
+.book-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+}
+
+.book-content {
+    width: 80%;
+    max-width: 800px;
+    height: 80%;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.book-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.book-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.book-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #8B4513;
+}
+
+.book-text {
+    flex-grow: 1;
+    overflow-y: auto;
+    line-height: 1.6;
+    padding-right: 10px;
+}
+
+.book-text::-webkit-scrollbar {
+    width: 8px;
+}
+
+.book-text::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+.book-text::-webkit-scrollbar-thumb {
+    background: #8B4513;
+    border-radius: 5px;
+}
+
+/* Mini-game context menu */
+.context-menu {
+    position: fixed;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 150;
+    display: none;
+}
+
+.context-menu-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.context-menu-item:hover {
+    background-color: #f0f0f0;
+}
+
+/* Mini-game modals */
+.game-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 300;
+}
+
+.game-content {
+    width: 90%;
+    max-width: 800px;
+    height: 90%;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.game-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.game-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #8B4513;
+}
+
+.game-area {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    position: relative;
+}
+
+.game-score {
+    position: absolute;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.game-score.current {
+    bottom: 10px;
+    right: 10px;
+}
+
+.game-score.high {
+    top: 10px;
+    right: 10px;
+}
+
+.game-score.record {
+    top: 10px;
+    left: 10px;
+}
+
+/* Highscores modal */
+.highscores-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 250;
+}
+
+.highscores-content {
+    width: 80%;
+    max-width: 600px;
+    max-height: 80%;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.highscores-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.highscores-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.highscores-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #8B4513;
+}
+
+.highscores-list {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.highscore-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.highscore-game {
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.highscore-value {
+    color: #333;
+}
+
+/* UI elements */
+.controls-info {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: rgba(255,255,255,0.8);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 50;
+}
+
+.controls-info h3 {
+    margin-bottom: 10px;
+    color: #8B4513;
+}
+
+.controls-info p {
+    margin-bottom: 5px;
+}
+
+.position-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(255,255,255,0.8);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 50;
+}
+
+.level-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgba(255,255,255,0.8);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 50;
+}
+
+/* Chair */
+.chair {
+    position: absolute;
+    bottom: 60%; /* Adjusted for taller floor */
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 
+        0 5px 15px rgba(0,0,0,0.2),
+        inset 0 -5px 10px rgba(0,0,0,0.1);
+    z-index: 2;
+}
+
+.chair-red {
+    background: radial-gradient(circle at 30% 30%, #ff6b6b, #d9534f);
+}
+
+.chair-green {
+    background: radial-gradient(circle at 30% 30%, #7dd87d, #5cb85c);
+}
+
+.chair::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 10px;
+    right: 10px;
+    height: 20px;
+    background: inherit;
+    border-radius: 5px 5px 0 0;
+    box-shadow: 0 -5px 10px rgba(0,0,0,0.1);
+}
+
+.chair::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 15px;
+    right: 15px;
+    height: 10px;
+    background: inherit;
+    border-radius: 0 0 50% 50%;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+/* Decorative elements */
+.love-sign {
+    position: absolute;
+    bottom: 70%; /* Adjusted for taller floor */
+    width: 80px;
+    height: 100px;
+    background: linear-gradient(135deg, #ff6b6b, #d9534f);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 2rem;
+    box-shadow: 
+        0 10px 20px rgba(0,0,0,0.3),
+        inset 0 0 10px rgba(255,255,255,0.2);
+    z-index: 3;
+}
+
+.artwork {
+    position: absolute;
+    bottom: 75%; /* Adjusted for taller floor */
+    width: 60px;
+    height: 80px;
+    background: linear-gradient(135deg, #ffd966, #f0ad4e);
+    border: 3px solid #8B4513;
+    border-radius: 5px;
+    box-shadow: 
+        0 5px 15px rgba(0,0,0,0.2),
+        inset 0 0 10px rgba(255,255,255,0.3);
+    z-index: 3;
+}
+
+/* Tooltip */
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+/* Chatbot interface */
+.chatbot {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    border: 2px solid #8B4513;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 500px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 100;
+}
+
+.chatbot-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.chatbot-title {
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.chatbot-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #8B4513;
+}
+
+.chatbot-messages {
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.chatbot-message {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.chatbot-message.user {
+    background-color: #e6f7ff;
+    text-align: right;
+}
+
+.chatbot-message.bot {
+    background-color: #f0f0f0;
+}
+
+.chatbot-input {
+    display: flex;
+    gap: 10px;
+}
+
+.chatbot-text {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #8B4513;
+    border-radius: 5px;
+}
+
+.chatbot-send {
+    background-color: #8B4513;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
