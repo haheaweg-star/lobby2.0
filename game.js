@@ -636,10 +636,10 @@ function openGame(gameId) {
     // Set game title
     const titles = {
         'brick-breaker': 'Brick Breaker',
-        'pong': 'Pong',
+        'pong': 'Table Tennis',
         'pacman': 'Multiplayer Pac-Man',
         'tetris': 'Tetris',
-        'space-invaders': 'Space Invaders',
+        'space-invaders': 'Asteroid Blaster',
         'dino-run': 'Dinosaur Run'
     };
     
@@ -698,7 +698,7 @@ function initGame(gameId) {
             initBrickBreaker();
             break;
         case 'pong':
-            initPong();
+            initTableTennis();
             break;
         case 'pacman':
             initPacman();
@@ -707,7 +707,7 @@ function initGame(gameId) {
             initTetris();
             break;
         case 'space-invaders':
-            initSpaceInvaders();
+            initAsteroidBlaster();
             break;
         case 'dino-run':
             initDinoRun();
@@ -937,8 +937,8 @@ function initBrickBreaker() {
     draw();
 }
 
-// Initialize Pong game
-function initPong() {
+// Initialize Table Tennis game (2-player Pong)
+function initTableTennis() {
     const gameArea = document.getElementById('game-area');
     
     // Create canvas
@@ -954,7 +954,7 @@ function initPong() {
     const paddleHeight = 80;
     const paddleWidth = 10;
     
-    const player = {
+    const player1 = {
         x: 10,
         y: canvas.height / 2 - paddleHeight / 2,
         width: paddleWidth,
@@ -963,13 +963,13 @@ function initPong() {
         speed: 6
     };
     
-    const computer = {
+    const player2 = {
         x: canvas.width - paddleWidth - 10,
         y: canvas.height / 2 - paddleHeight / 2,
         width: paddleWidth,
         height: paddleHeight,
         score: 0,
-        speed: 4
+        speed: 6
     };
     
     const ball = {
@@ -981,6 +981,8 @@ function initPong() {
     };
     
     // Controls
+    let wPressed = false;
+    let sPressed = false;
     let upPressed = false;
     let downPressed = false;
     
@@ -988,19 +990,17 @@ function initPong() {
     document.addEventListener('keyup', keyUpHandler);
     
     function keyDownHandler(e) {
-        if (e.key === 'Up' || e.key === 'ArrowUp') {
-            upPressed = true;
-        } else if (e.key === 'Down' || e.key === 'ArrowDown') {
-            downPressed = true;
-        }
+        if (e.key === 'w' || e.key === 'W') wPressed = true;
+        else if (e.key === 's' || e.key === 'S') sPressed = true;
+        else if (e.key === 'ArrowUp') upPressed = true;
+        else if (e.key === 'ArrowDown') downPressed = true;
     }
     
     function keyUpHandler(e) {
-        if (e.key === 'Up' || e.key === 'ArrowUp') {
-            upPressed = false;
-        } else if (e.key === 'Down' || e.key === 'ArrowDown') {
-            downPressed = false;
-        }
+        if (e.key === 'w' || e.key === 'W') wPressed = false;
+        else if (e.key === 's' || e.key === 'S') sPressed = false;
+        else if (e.key === 'ArrowUp') upPressed = false;
+        else if (e.key === 'ArrowDown') downPressed = false;
     }
     
     // Draw functions
@@ -1023,8 +1023,15 @@ function initPong() {
     function drawScore() {
         ctx.font = '20px Arial';
         ctx.fillStyle = '#fff';
-        ctx.fillText(`Player: ${player.score}`, canvas.width / 4, 30);
-        ctx.fillText(`Computer: ${computer.score}`, 3 * canvas.width / 4, 30);
+        ctx.fillText(`Player 1: ${player1.score}`, canvas.width / 4, 30);
+        ctx.fillText(`Player 2: ${player2.score}`, 3 * canvas.width / 4, 30);
+    }
+    
+    function drawInstructions() {
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#aaa';
+        ctx.fillText('Player 1: W/S keys', canvas.width / 4, 60);
+        ctx.fillText('Player 2: Arrow keys', 3 * canvas.width / 4, 60);
     }
     
     // Game loop
@@ -1032,9 +1039,10 @@ function initPong() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         drawScore();
+        drawInstructions();
         drawBall();
-        drawPaddle(player);
-        drawPaddle(computer);
+        drawPaddle(player1);
+        drawPaddle(player2);
         
         // Ball movement
         ball.x += ball.dx;
@@ -1047,64 +1055,63 @@ function initPong() {
         
         // Paddle collision
         if (
-            // Player paddle
-            ball.x - ball.radius < player.x + player.width &&
-            ball.y > player.y &&
-            ball.y < player.y + player.height &&
+            // Player 1 paddle
+            ball.x - ball.radius < player1.x + player1.width &&
+            ball.y > player1.y &&
+            ball.y < player1.y + player1.height &&
             ball.dx < 0
         ) {
             ball.dx = -ball.dx;
             
             // Change ball direction based on where it hits the paddle
-            const hitPos = (ball.y - player.y) / player.height;
+            const hitPos = (ball.y - player1.y) / player1.height;
             ball.dy = 8 * (hitPos - 0.5);
         }
         
         if (
-            // Computer paddle
-            ball.x + ball.radius > computer.x &&
-            ball.y > computer.y &&
-            ball.y < computer.y + computer.height &&
+            // Player 2 paddle
+            ball.x + ball.radius > player2.x &&
+            ball.y > player2.y &&
+            ball.y < player2.y + player2.height &&
             ball.dx > 0
         ) {
             ball.dx = -ball.dx;
             
             // Change ball direction based on where it hits the paddle
-            const hitPos = (ball.y - computer.y) / computer.height;
+            const hitPos = (ball.y - player2.y) / player2.height;
             ball.dy = 8 * (hitPos - 0.5);
         }
         
         // Score when ball goes out of bounds
         if (ball.x + ball.dx > canvas.width - ball.radius) {
-            // Player scores
-            player.score++;
+            // Player 1 scores
+            player1.score++;
             game.currentScore += 10;
             document.getElementById('game-current').textContent = `Score: ${game.currentScore}`;
             resetBall();
         } else if (ball.x + ball.dx < ball.radius) {
-            // Computer scores
-            computer.score++;
+            // Player 2 scores
+            player2.score++;
             resetBall();
         }
         
-        // Player movement
-        if (upPressed && player.y > 0) {
-            player.y -= player.speed;
-        } else if (downPressed && player.y < canvas.height - player.height) {
-            player.y += player.speed;
+        // Player 1 movement
+        if (wPressed && player1.y > 0) {
+            player1.y -= player1.speed;
+        } else if (sPressed && player1.y < canvas.height - player1.height) {
+            player1.y += player1.speed;
         }
         
-        // Computer AI - follow the ball
-        const computerCenter = computer.y + computer.height / 2;
-        if (computerCenter < ball.y - 20) {
-            computer.y += computer.speed;
-        } else if (computerCenter > ball.y + 20) {
-            computer.y -= computer.speed;
+        // Player 2 movement
+        if (upPressed && player2.y > 0) {
+            player2.y -= player2.speed;
+        } else if (downPressed && player2.y < canvas.height - player2.height) {
+            player2.y += player2.speed;
         }
         
         // Check for game end
-        if (player.score >= 5 || computer.score >= 5) {
-            endGame(player.score >= 5);
+        if (player1.score >= 5 || player2.score >= 5) {
+            endGame(player1.score >= 5);
             return;
         }
         
@@ -1120,7 +1127,7 @@ function initPong() {
     }
     
     // End game
-    function endGame(playerWon) {
+    function endGame(player1Won) {
         cancelAnimationFrame(game.gameLoop);
         
         // Display result
@@ -1128,12 +1135,12 @@ function initPong() {
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
         
-        if (playerWon) {
-            ctx.fillText('You Win!', canvas.width / 2, canvas.height / 2);
+        if (player1Won) {
+            ctx.fillText('Player 1 Wins!', canvas.width / 2, canvas.height / 2);
             game.currentScore += 50; // Bonus for winning
             document.getElementById('game-current').textContent = `Score: ${game.currentScore}`;
         } else {
-            ctx.fillText('Computer Wins!', canvas.width / 2, canvas.height / 2);
+            ctx.fillText('Player 2 Wins!', canvas.width / 2, canvas.height / 2);
         }
         
         ctx.font = '16px Arial';
@@ -1163,7 +1170,7 @@ function initPacman() {
     
     const ctx = canvas.getContext('2d');
     
-    // Game objects
+    // Game constants
     const cellSize = 20;
     const pacman = {
         x: 9 * cellSize,
@@ -1938,8 +1945,8 @@ function initTetris() {
     update();
 }
 
-// Initialize Space Invaders game
-function initSpaceInvaders() {
+// Initialize Asteroid Blaster game
+function initAsteroidBlaster() {
     const gameArea = document.getElementById('game-area');
     
     // Create canvas
@@ -1952,57 +1959,68 @@ function initSpaceInvaders() {
     const ctx = canvas.getContext('2d');
     
     // Game constants
-    const PLAYER_WIDTH = 50;
-    const PLAYER_HEIGHT = 20;
-    const PLAYER_SPEED = 5;
-    const BULLET_SPEED = 7;
-    const ALIEN_ROWS = 4;
-    const ALIEN_COLS = 8;
-    const ALIEN_WIDTH = 30;
-    const ALIEN_HEIGHT = 30;
-    const ALIEN_GAP = 10;
-    const ALIEN_SPEED = 1;
-    const ALIEN_DROP_DISTANCE = 20;
+    const SHIP_WIDTH = 30;
+    const SHIP_HEIGHT = 20;
+    const SHIP_SPEED = 5;
+    const BULLET_SPEED = 10;
+    const ASTEROID_MIN_SIZE = 20;
+    const ASTEROID_MAX_SIZE = 60;
+    const ASTEROID_MIN_SPEED = 1;
+    const ASTEROID_MAX_SPEED = 5;
+    const ASTEROID_SPAWN_RATE = 60; // Frames
     
     // Game state
-    let player = {
-        x: canvas.width / 2 - PLAYER_WIDTH / 2,
-        y: canvas.height - PLAYER_HEIGHT - 20,
-        width: PLAYER_WIDTH,
-        height: PLAYER_HEIGHT,
-        speed: PLAYER_SPEED
+    let ship = {
+        x: canvas.width / 2,
+        y: canvas.height - 50,
+        width: SHIP_WIDTH,
+        height: SHIP_HEIGHT,
+        speed: SHIP_SPEED
     };
     
     let bullets = [];
-    let aliens = [];
-    let alienDirection = 1; // 1 for right, -1 for left
-    let alienDrop = false;
+    let asteroids = [];
     let gameOver = false;
-    let lastTime = 0;
+    let frameCount = 0;
+    let difficulty = 1;
     
-    // Create aliens
-    function createAliens() {
-        for (let row = 0; row < ALIEN_ROWS; row++) {
-            aliens[row] = [];
-            for (let col = 0; col < ALIEN_COLS; col++) {
-                aliens[row][col] = {
-                    x: col * (ALIEN_WIDTH + ALIEN_GAP) + 50,
-                    y: row * (ALIEN_HEIGHT + ALIEN_GAP) + 50,
-                    width: ALIEN_WIDTH,
-                    height: ALIEN_HEIGHT,
-                    alive: true
-                };
-            }
-        }
+    // Create stars for background
+    const stars = [];
+    for (let i = 0; i < 100; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 2,
+            speed: Math.random() * 2 + 1
+        });
     }
     
-    // Draw player
-    function drawPlayer() {
-        ctx.fillStyle = '#00ff00';
+    // Draw stars
+    function drawStars() {
+        ctx.fillStyle = '#fff';
+        stars.forEach(star => {
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Move stars
+            star.y += star.speed;
+            
+            // Reset stars that go off screen
+            if (star.y > canvas.height) {
+                star.y = 0;
+                star.x = Math.random() * canvas.width;
+            }
+        });
+    }
+    
+    // Draw ship
+    function drawShip() {
+        ctx.fillStyle = '#0ff';
         ctx.beginPath();
-        ctx.moveTo(player.x, player.y);
-        ctx.lineTo(player.x + player.width, player.y);
-        ctx.lineTo(player.x + player.width / 2, player.y + player.height);
+        ctx.moveTo(ship.x, ship.y);
+        ctx.lineTo(ship.x - ship.width / 2, ship.y + ship.height);
+        ctx.lineTo(ship.x + ship.width / 2, ship.y + ship.height);
         ctx.closePath();
         ctx.fill();
     }
@@ -2015,47 +2033,40 @@ function initSpaceInvaders() {
         });
     }
     
-    // Draw aliens
-    function drawAliens() {
-        for (let row = 0; row < ALIEN_ROWS; row++) {
-            for (let col = 0; col < ALIEN_COLS; col++) {
-                const alien = aliens[row][col];
-                if (alien.alive) {
-                    ctx.fillStyle = '#f00';
-                    
-                    // Draw alien body
-                    ctx.beginPath();
-                    ctx.arc(alien.x + alien.width / 2, alien.y + alien.height / 2, alien.width / 2, 0, Math.PI);
-                    ctx.fill();
-                    
-                    // Draw alien legs
-                    ctx.fillRect(alien.x, alien.y + alien.height / 2, alien.width, alien.height / 2);
-                    
-                    // Draw alien eyes
-                    ctx.fillStyle = '#fff';
-                    ctx.beginPath();
-                    ctx.arc(alien.x + alien.width / 3, alien.y + alien.height / 3, 3, 0, Math.PI * 2);
-                    ctx.arc(alien.x + 2 * alien.width / 3, alien.y + alien.height / 3, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
+    // Draw asteroids
+    function drawAsteroids() {
+        asteroids.forEach(asteroid => {
+            ctx.fillStyle = '#888';
+            ctx.beginPath();
+            ctx.arc(asteroid.x, asteroid.y, asteroid.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw asteroid details
+            ctx.fillStyle = '#666';
+            ctx.beginPath();
+            ctx.arc(asteroid.x - asteroid.size / 3, asteroid.y - asteroid.size / 3, asteroid.size / 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(asteroid.x + asteroid.size / 4, asteroid.y + asteroid.size / 4, asteroid.size / 5, 0, Math.PI * 2);
+            ctx.fill();
+        });
     }
     
-    // Move player
-    function movePlayer(dir) {
-        player.x += dir * player.speed;
+    // Move ship
+    function moveShip(dir) {
+        ship.x += dir * ship.speed;
         
-        // Keep player on screen
-        if (player.x < 0) player.x = 0;
-        if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+        // Keep ship on screen
+        if (ship.x < ship.width / 2) ship.x = ship.width / 2;
+        if (ship.x > canvas.width - ship.width / 2) ship.x = canvas.width - ship.width / 2;
     }
     
     // Shoot bullet
     function shootBullet() {
         bullets.push({
-            x: player.x + player.width / 2 - 2,
-            y: player.y,
+            x: ship.x - 2,
+            y: ship.y,
             width: 4,
             height: 10,
             speed: BULLET_SPEED
@@ -2074,98 +2085,82 @@ function initSpaceInvaders() {
         }
     }
     
-    // Move aliens
-    function moveAliens() {
-        let shouldDrop = false;
+    // Spawn asteroid
+    function spawnAsteroid() {
+        const size = ASTEROID_MIN_SIZE + Math.random() * (ASTEROID_MAX_SIZE - ASTEROID_MIN_SIZE) / difficulty;
+        const speed = ASTEROID_MIN_SPEED + Math.random() * (ASTEROID_MAX_SPEED - ASTEROID_MIN_SPEED) * difficulty;
         
-        // Check if any alien has hit the edge
-        for (let row = 0; row < ALIEN_ROWS; row++) {
-            for (let col = 0; col < ALIEN_COLS; col++) {
-                const alien = aliens[row][col];
-                if (alien.alive) {
-                    if ((alienDirection === 1 && alien.x + alien.width >= canvas.width) ||
-                        (alienDirection === -1 && alien.x <= 0)) {
-                        shouldDrop = true;
-                        break;
-                    }
-                }
+        asteroids.push({
+            x: Math.random() * canvas.width,
+            y: -size,
+            size: size,
+            speed: speed,
+            health: Math.floor(size / 10) // Larger asteroids require more hits
+        });
+    }
+    
+    // Move asteroids
+    function moveAsteroids() {
+        for (let i = asteroids.length - 1; i >= 0; i--) {
+            asteroids[i].y += asteroids[i].speed;
+            
+            // Remove asteroids that go off screen
+            if (asteroids[i].y - asteroids[i].size > canvas.height) {
+                asteroids.splice(i, 1);
             }
-            if (shouldDrop) break;
-        }
-        
-        // Move aliens
-        for (let row = 0; row < ALIEN_ROWS; row++) {
-            for (let col = 0; col < ALIEN_COLS; col++) {
-                const alien = aliens[row][col];
-                if (alien.alive) {
-                    if (shouldDrop) {
-                        alien.y += ALIEN_DROP_DISTANCE;
-                    } else {
-                        alien.x += ALIEN_SPEED * alienDirection;
-                    }
-                    
-                    // Check if alien has reached the player
-                    if (alien.y + alien.height >= player.y) {
-                        gameOver = true;
-                    }
-                }
-            }
-        }
-        
-        if (shouldDrop) {
-            alienDirection *= -1;
         }
     }
     
     // Check collisions
     function checkCollisions() {
-        // Check bullet-alien collisions
+        // Check bullet-asteroid collisions
         for (let i = bullets.length - 1; i >= 0; i--) {
             const bullet = bullets[i];
             
-            for (let row = 0; row < ALIEN_ROWS; row++) {
-                for (let col = 0; col < ALIEN_COLS; col++) {
-                    const alien = aliens[row][col];
+            for (let j = asteroids.length - 1; j >= 0; j--) {
+                const asteroid = asteroids[j];
+                
+                const distance = Math.sqrt(
+                    Math.pow(bullet.x + bullet.width / 2 - asteroid.x, 2) + 
+                    Math.pow(bullet.y + bullet.height / 2 - asteroid.y, 2)
+                );
+                
+                if (distance < asteroid.size) {
+                    // Hit!
+                    asteroid.health--;
                     
-                    if (alien.alive &&
-                        bullet.x < alien.x + alien.width &&
-                        bullet.x + bullet.width > alien.x &&
-                        bullet.y < alien.y + alien.height &&
-                        bullet.y + bullet.height > alien.y) {
-                        
-                        // Hit!
-                        alien.alive = false;
-                        bullets.splice(i, 1);
+                    if (asteroid.health <= 0) {
+                        // Destroy asteroid
+                        asteroids.splice(j, 1);
                         
                         // Update score
-                        game.currentScore += 10;
+                        game.currentScore += Math.floor(asteroid.size);
                         document.getElementById('game-current').textContent = `Score: ${game.currentScore}`;
                         
-                        // Check if all aliens are dead
-                        let allDead = true;
-                        for (let r = 0; r < ALIEN_ROWS; r++) {
-                            for (let c = 0; c < ALIEN_COLS; c++) {
-                                if (aliens[r][c].alive) {
-                                    allDead = false;
-                                    break;
-                                }
-                            }
-                            if (!allDead) break;
+                        // Increase difficulty
+                        if (game.currentScore % 100 === 0) {
+                            difficulty += 0.2;
                         }
-                        
-                        if (allDead) {
-                            // Create new wave
-                            createAliens();
-                            alienDirection = 1;
-                            
-                            // Bonus for clearing wave
-                            game.currentScore += 100;
-                            document.getElementById('game-current').textContent = `Score: ${game.currentScore}`;
-                        }
-                        
-                        break;
                     }
+                    
+                    // Remove bullet
+                    bullets.splice(i, 1);
+                    break;
                 }
+            }
+        }
+        
+        // Check ship-asteroid collisions
+        for (let i = 0; i < asteroids.length; i++) {
+            const asteroid = asteroids[i];
+            
+            const distance = Math.sqrt(
+                Math.pow(ship.x - asteroid.x, 2) + 
+                Math.pow(ship.y + ship.height / 2 - asteroid.y, 2)
+            );
+            
+            if (distance < asteroid.size + ship.width / 2) {
+                gameOver = true;
             }
         }
     }
@@ -2175,29 +2170,37 @@ function initSpaceInvaders() {
         if (gameOver) return;
         
         if (e.key === 'ArrowLeft') {
-            movePlayer(-1);
+            moveShip(-1);
         } else if (e.key === 'ArrowRight') {
-            movePlayer(1);
-        } else if (e.key === ' ') {
+            moveShip(1);
+        } else if (e.key === ' ' || e.key === 'ArrowUp') {
             shootBullet();
         }
     });
     
     // Game loop
-    function update(time = 0) {
+    function update() {
         if (gameOver) {
             endGame();
             return;
         }
         
+        frameCount++;
+        
+        // Spawn asteroids
+        if (frameCount % Math.floor(ASTEROID_SPAWN_RATE / difficulty) === 0) {
+            spawnAsteroid();
+        }
+        
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        drawPlayer();
+        drawStars();
+        drawShip();
         drawBullets();
-        drawAliens();
+        drawAsteroids();
         
         moveBullets();
-        moveAliens();
+        moveAsteroids();
         checkCollisions();
         
         game.gameLoop = requestAnimationFrame(update);
@@ -2208,23 +2211,52 @@ function initSpaceInvaders() {
         cancelAnimationFrame(game.gameLoop);
         
         // Display result
-        ctx.font = '30px Arial';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
         ctx.fillStyle = '#fff';
+        ctx.font = '30px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 30);
         
         ctx.font = '16px Arial';
-        ctx.fillText(`Final Score: ${game.currentScore}`, canvas.width / 2, canvas.height / 2 + 40);
+        ctx.fillText(`Final Score: ${game.currentScore}`, canvas.width / 2, canvas.height / 2 + 10);
+        ctx.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 40);
         
         // Gain experience based on score
-        const expGained = Math.floor(game.currentScore / 50);
+        const expGained = Math.floor(game.currentScore / 20);
         if (expGained > 0) {
             gainExperience(expGained);
         }
+        
+        // Add restart functionality
+        document.addEventListener('keydown', function restartHandler(e) {
+            if (e.key === 'r' || e.key === 'R') {
+                // Reset game state
+                ship = {
+                    x: canvas.width / 2,
+                    y: canvas.height - 50,
+                    width: SHIP_WIDTH,
+                    height: SHIP_HEIGHT,
+                    speed: SHIP_SPEED
+                };
+                
+                bullets = [];
+                asteroids = [];
+                gameOver = false;
+                frameCount = 0;
+                difficulty = 1;
+                
+                // Restart game
+                update();
+                
+                // Remove event listener
+                document.removeEventListener('keydown', restartHandler);
+            }
+        });
     }
     
-    // Initialize game
-    createAliens();
+    // Start game
     update();
 }
 
@@ -2584,10 +2616,10 @@ function showHighscores() {
         // Format game name
         const names = {
             'brick-breaker': 'Brick Breaker',
-            'pong': 'Pong',
+            'pong': 'Table Tennis',
             'pacman': 'Multiplayer Pac-Man',
             'tetris': 'Tetris',
-            'space-invaders': 'Space Invaders',
+            'space-invaders': 'Asteroid Blaster',
             'dino-run': 'Dinosaur Run'
         };
         
