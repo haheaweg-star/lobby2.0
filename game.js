@@ -18,7 +18,7 @@ const game = {
         x: 0
     },
     keys: {},
-    lobbyWidth: 20000, // Expanded for more walking space
+    lobbyWidth: 10000, // Changed to 10000px total width (5000px left + 5000px right)
     screenWidth: window.innerWidth,
     npcPaths: {},
     highscores: {
@@ -282,14 +282,14 @@ function handleInput() {
     
     // Horizontal movement
     if (game.keys['arrowleft'] || game.keys['a']) {
-        player.x = Math.max(-1000, player.x - player.speed); // Allow 1000px to the left
+        player.x = Math.max(-5000, player.x - player.speed); // Allow 5000px to the left
         isMoving = true;
         player.facingRight = false;
         document.getElementById('player').classList.remove('facing-right');
         document.getElementById('player').classList.add('facing-left');
     }
     if (game.keys['arrowright'] || game.keys['d']) {
-        player.x = Math.min(game.lobbyWidth - 1000, player.x + player.speed); // Allow 1000px to the right
+        player.x = Math.min(5000, player.x + player.speed); // Allow 5000px to the right
         isMoving = true;
         player.facingRight = true;
         document.getElementById('player').classList.remove('facing-left');
@@ -378,18 +378,18 @@ function checkElevatorAccess() {
 function setupNPCPaths() {
     // Define paths for NPCs to walk
     game.npcPaths = {
-        librarian: { start: 300, end: 350, speed: 1, direction: 1 },
-        researcher: { start: 1200, end: 1250, speed: 1, direction: 1 },
-        professor: { start: 2200, end: 2250, speed: 1, direction: 1 },
-        historian: { start: 3200, end: 3250, speed: 1, direction: 1 },
-        student: { start: 4200, end: 4250, speed: 1, direction: 1 },
-        bookworm: { start: 5200, end: 5250, speed: 1, direction: 1 },
-        curator: { start: 6200, end: 6250, speed: 1, direction: 1 },
-        archivist: { start: 7200, end: 7250, speed: 1, direction: 1 },
-        collector: { start: 8200, end: 8250, speed: 1, direction: 1 },
-        scholar: { start: 9200, end: 9250, speed: 1, direction: 1 },
-        receptionist1: { start: 4550, end: 4650, speed: 0.5, direction: 1 },
-        receptionist2: { start: 4700, end: 4800, speed: 0.5, direction: 1 }
+        librarian: { start: -4500, end: -4450, speed: 1, direction: 1 },
+        researcher: { start: -3500, end: -3450, speed: 1, direction: 1 },
+        professor: { start: -2500, end: -2450, speed: 1, direction: 1 },
+        historian: { start: -1500, end: -1450, speed: 1, direction: 1 },
+        student: { start: -500, end: -450, speed: 1, direction: 1 },
+        bookworm: { start: 500, end: 550, speed: 1, direction: 1 },
+        curator: { start: 1500, end: 1550, speed: 1, direction: 1 },
+        archivist: { start: 2500, end: 2550, speed: 1, direction: 1 },
+        collector: { start: 3500, end: 3550, speed: 1, direction: 1 },
+        scholar: { start: 4500, end: 4550, speed: 1, direction: 1 },
+        receptionist1: { start: -100, end: 100, speed: 0.5, direction: 1 },
+        receptionist2: { start: -100, end: 100, speed: 0.5, direction: 1 }
     };
 }
 
@@ -1186,19 +1186,19 @@ function initPacman() {
     const maze = [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,1],
-        [1,3,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,1],
+        [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,0,0,1],
+        [1,3,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,0,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,0,1],
         [1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
-        [1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,0,1,1,0,1,1,1,2,2,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,0,1,1,0,1,2,2,2,2,2,2,1,0,1,1,0,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,0,1,1,0,1,1,1,2,2,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,0,1,1,0,1,2,2,2,2,2,2,1,0,1,1,0,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,1],
+        [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,0,0,1],
         [1,3,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,3,0,1],
         [1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,0,1,1,1,1,1],
         [1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
